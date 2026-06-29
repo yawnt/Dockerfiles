@@ -1,13 +1,7 @@
 # Devbox: happy-server (standalone) + omp
 # =======================================
-# Extends the happy standalone pattern from packages/happy-server/README.md:
-#   docker build -t happy-server -f Dockerfile .
-#   docker run -p 3005:3005 -e HANDY_MASTER_SECRET=<secret> -v happy-data:/data happy-server
-#
+# Extends the happy standalone pattern from packages/happy-server/README.md.
 # Adds omp so the daemon can spawn `happy acp -- omp acp` sessions.
-#
-# Build:
-#   docker build -f Dockerfile.omp -t happy-omp-devbox .
 #
 # Run:
 #   docker run -p 3005:3005 -v happy-data:/data \
@@ -25,9 +19,12 @@ ENV DATA_DIR=/data
 ENV PGLITE_DIR=/data/pglite
 ENV HAPPY_HOME_DIR=/data/happy
 
-RUN mkdir -p /data/pglite /data/happy /data/files && chmod 777 /data
+RUN mkdir -p /data/pglite /data/happy /data/files && chown -R node:node /data
 
+USER node
 VOLUME /data
 EXPOSE 3005
 
-CMD ["happy-server", "serve"]
+# Mirrors the base image CMD: migrate then serve.
+# migrate is idempotent — safe to run on every start.
+CMD ["sh", "-c", "happy-server migrate && exec happy-server serve"]
