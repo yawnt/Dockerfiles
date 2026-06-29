@@ -2,3 +2,5 @@
 .gitignore
 .DS_Store
 README.md
+k8s/
+.github/
